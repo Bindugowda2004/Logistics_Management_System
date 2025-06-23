@@ -1,0 +1,84 @@
+/* Custom styles for Logistics Management System */
+
+.navbar {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-brand {
+  font-weight: bold;
+}
+
+.card {
+  transition: transform 0.3s;
+  border: none;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+}
+
+.shadow-sm {
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075) !important;
+}
+
+.shadow {
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+}
+
+.btn {
+  border-radius: 4px;
+  padding: 0.5rem 1.5rem;
+}
+
+.btn-primary {
+  background-color: #3f51b5;
+  border-color: #3f51b5;
+}
+
+.btn-primary:hover {
+  background-color: #303f9f;
+  border-color: #303f9f;
+}
+
+.btn-outline-primary {
+  color: #3f51b5;
+  border-color: #3f51b5;
+}
+
+.btn-outline-primary:hover {
+  background-color: #3f51b5;
+  border-color: #3f51b5;
+}
+
+.form-control:focus {
+  border-color: #3f51b5;
+  box-shadow: 0 0 0 0.25rem rgba(63, 81, 181, 0.25);
+}
+
+.bg-primary {
+  background-color: #3f51b5 !important;
+}
+
+.text-primary {
+  color: #3f51b5 !important;
+}
+
+/* Profile page styles */
+.rounded-circle {
+  border-radius: 50% !important;
+}
+
+/* Animation for loading spinner */
+@keyframes spinner {
+  to {transform: rotate(360deg);}
+}
+
+.spinner-border {
+  display: inline-block;
+  width: 1rem;
+  height: 1rem;
+  border: 0.2em solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: spinner 0.75s linear infinite;
+}

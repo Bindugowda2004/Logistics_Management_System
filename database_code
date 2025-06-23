@@ -1,0 +1,99 @@
+-- Users Table (for authentication and basic user information)
+CREATE TABLE Users (
+    user_id INT PRIMARY KEY AUTO_INCREMENT,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    role ENUM('admin', 'logistics_manager', 'warehouse_staff', 'delivery_driver') NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Warehouses Table
+CREATE TABLE Warehouses (
+    warehouse_id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(100) NOT NULL,
+    location VARCHAR(255) NOT NULL,
+    capacity DECIMAL(10,2) NOT NULL,
+    manager_id INT,
+    FOREIGN KEY (manager_id) REFERENCES Users(user_id)
+);
+
+-- Shipments Table
+CREATE TABLE Shipments (
+    shipment_id INT PRIMARY KEY AUTO_INCREMENT,
+    sender_id INT NOT NULL,
+    recipient_id INT NOT NULL,
+    origin_warehouse_id INT NOT NULL,
+    destination_warehouse_id INT NOT NULL,
+    current_location VARCHAR(255),
+    status ENUM('Pending', 'In Transit', 'Delivered', 'Delayed') NOT NULL DEFAULT 'Pending',
+    estimated_delivery_date DATE,
+    actual_delivery_date DATE,
+    weight DECIMAL(10,2) NOT NULL,
+    tracking_number VARCHAR(50) UNIQUE NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (sender_id) REFERENCES Users(user_id),
+    FOREIGN KEY (recipient_id) REFERENCES Users(user_id),
+    FOREIGN KEY (origin_warehouse_id) REFERENCES Warehouses(warehouse_id),
+    FOREIGN KEY (destination_warehouse_id) REFERENCES Warehouses(warehouse_id)
+);
+
+-- Delivery Trucks Table
+CREATE TABLE DeliveryTrucks (
+    truck_id INT PRIMARY KEY AUTO_INCREMENT,
+    license_plate VARCHAR(20) UNIQUE NOT NULL,
+    capacity DECIMAL(10,2) NOT NULL,
+    current_location VARCHAR(255),
+    status ENUM('Available', 'In Transit', 'Maintenance') NOT NULL DEFAULT 'Available',
+    driver_id INT,
+    FOREIGN KEY (driver_id) REFERENCES Users(user_id)
+);
+
+-- Shipment Tracking Log
+CREATE TABLE ShipmentTrackingLog (
+    log_id INT PRIMARY KEY AUTO_INCREMENT,
+    shipment_id INT NOT NULL,
+    truck_id INT,
+    location VARCHAR(255) NOT NULL,
+    status VARCHAR(50) NOT NULL,
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (shipment_id) REFERENCES Shipments(shipment_id),
+    FOREIGN KEY (truck_id) REFERENCES DeliveryTrucks(truck_id)
+);
+
+-- User Authentication Stored Procedures
+DELIMITER //
+
+-- User Signup Procedure
+CREATE PROCEDURE UserSignup(
+    IN p_username VARCHAR(50),
+    IN p_email VARCHAR(100),
+    IN p_password VARCHAR(255),
+    IN p_role ENUM('admin', 'logistics_manager', 'warehouse_staff', 'delivery_driver')
+)
+BEGIN
+    INSERT INTO Users (username, email, password_hash, role) 
+    VALUES (p_username, p_email, SHA2(p_password, 256), p_role);
+END //
+
+-- User Login Procedure
+CREATE PROCEDURE UserLogin(
+    IN p_username VARCHAR(50),
+    IN p_password VARCHAR(255)
+)
+BEGIN
+    SELECT user_id, username, email, role 
+    FROM Users 
+    WHERE username = p_username 
+    AND password_hash = SHA2(p_password, 256);
+END //
+
+DELIMITER ;
+
+-- Indexes for performance optimization
+CREATE INDEX idx_shipment_status ON Shipments(status);
+CREATE INDEX idx_shipment_tracking ON ShipmentTrackingLog(shipment_id, timestamp);
+CREATE INDEX idx_user_email ON Users(email);
